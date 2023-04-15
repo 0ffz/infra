@@ -1,0 +1,105 @@
+# {% if not app_cidr == "" %}
+# networks:
+#   app:
+#     driver: macvlan
+#     driver_opts: 
+#       parent: app
+#     ipam:
+#       config:
+#         - subnet: {{ app_cidr }}
+# {% endif %}
+
+services:
+# {% if "nginxproxymanager" in services %}
+#   nginxproxymanager:
+#     container_name: nginxproxymanager
+#     image: jc21/nginx-proxy-manager:latest
+# {% if not app_cidr == "" %}
+#     networks:
+#       app:
+#         ipv4_address: {{ app_base }}.24
+# {% else %}
+#     ports:
+#       - "80:80"
+#       - "81:81"
+#       - "443:443"
+# {% endif %}
+#     restart: always
+#     volumes:
+#       - "{{ docker_dir }}/nginxproxymanager/data:/data"
+#       - "{{ docker_dir }}/nginxproxymanager/letsencrypt:/etc/letsencrypt"
+# {% endif %}
+
+{% if "minecraft-create-astral" in services %}
+  minecraft-create-astral:
+    container_name: mc-modpack
+    image: itzg/minecraft-server:java17-alpine
+    ports:
+      - "25565:25565"
+    volumes:
+      - "{{ docker_dir }}/create-astral:/config"
+    environment:
+      - EULA: "TRUE"
+      - TYPE: FABRIC
+      - FABRIC_LOADER_VERSION: 0.14.14
+      - MEMORY: 4G
+      - USE_AIKAR_FLAGS: "true"
+    tty: true
+    stdin_open: true
+    restart: unless-stopped
+{% endif %}
+
+# {% if "photoprism" in services %}
+#   photoprism_mariadb:
+#     container_name: photoprism-mariadb
+#     image: mariadb:latest
+#     restart: unless-stopped
+#     volumes: 
+#       - {{ docker_dir }}/photoprism/db:/var/lib/mysql
+#     environment:
+#       - TZ={{ timezone }}
+#       - MYSQL_ROOT_PASSWORD={{ photoprism.mysql.root_password }}
+#       - MYSQL_DATABASE={{ photoprism.mysql.db }}
+#       - MYSQL_USER={{ photoprism.mysql.user }}
+#       - MYSQL_PASSWORD={{ photoprism.mysql.password }}
+
+#   photoprism:
+#     container_name: photoprism
+#     image: photoprism/photoprism:latest
+#     restart: unless-stopped
+#     ports: 
+#       - 2342:2342
+#     volumes: 
+#       - {{ docker_dir }}/photoprism/app:/photoprism
+#     environment:
+#       - PUID={{ guid }}
+#       - PGID={{ guid }}
+#       - PHOTOPRISM_GID={{ guid }}
+#       - PHOTOPRISM_UID={{ guid }}
+#       - TZ={{ timezone }}
+#       - PHOTOPRISM_ADMIN_PASSWORD={{ photoprism.password }}
+#       - PHOTOPRISM_SITE_URL=http://localhost:2342
+#       - PHOTOPRISM_EXPERIMENTAL=false
+#       - PHOTOPRISM_HTTP_COMPRESSION=gzip
+#       - PHOTOPRISM_DATABASE_DRIVER=mysql
+#       - PHOTOPRISM_DATABASE_SERVER=photoprism-mariadb:3306
+#       - PHOTOPRISM_AUTH_MODE="public"
+#       - PHOTOPRISM_DATABASE_NAME={{ photoprism.mysql.db }}
+#       - PHOTOPRISM_DATABASE_USER={{ photoprism.mysql.user }}
+#       - PHOTOPRISM_DATABASE_PASSWORD={{ photoprism.mysql.password }}
+#       - PHOTOPRISM_DISABLE_CHOWN=false              
+#       - PHOTOPRISM_DISABLE_BACKUPS=true
+#       - PHOTOPRISM_DISABLE_WEBDAV=false             
+#       - PHOTOPRISM_DETECT_NSFW=true
+#       - PHOTOPRISM_UPLOAD_NSFW=false
+#       - PHOTOPRISM_DEBUG=true
+#       - PHOTOPRISM_THUMB_FILTER=lanczos
+#       - PHOTOPRISM_THUMB_UNCACHED=true
+#       - PHOTOPRISM_THUMB_SIZE=2048
+#       - PHOTOPRISM_THUMB_SIZE_UNCACHED=7680           
+#       - PHOTOPRISM_JPEG_SIZE=7680 
+#       - PHOTOPRISM_JPEG_QUALITY=92
+#       - TF_CPP_MIN_LOG_LEVEL=0 
+#       - PHOTOPRISM_FFMPEG_ENCODER=h264_qsv        
+#       - PHOTOPRISM_INIT=tensorflow-amd64-avx2
+# {% endif %}

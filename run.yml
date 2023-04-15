@@ -1,0 +1,18 @@
+- hosts: mona
+  gather_facts: no
+
+  pre_tasks:
+      - import_tasks: tasks/ssh_juggle_port.yml
+        tags:
+            - always
+            - port
+
+- hosts: fleet
+  become: yes
+
+  roles:
+      # Basics
+      - role: system
+      - role: geerlingguy.security
+      - role: geerlingguy.docker
+      - name: containers
