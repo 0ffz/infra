@@ -7,29 +7,27 @@ username: offz
 
 shell: /usr/bin/fish
 
-dotfiles_repo: https://github.com/notthebee/dotfiles
-
 guid: 1000
 
 # Networking
-tailscale_enabled: yes 
+# tailscale_enabled: yes 
 
-tailscale_exit_node: no
+# tailscale_exit_node: no
 
-networks:
-  - name: lan
-    cidr: 192.168.2.0/24
-    base: 192.168.2
-    interface: ens18
-    tailscale: yes # whether the subnet should be exposed to other Tailscale nodes
-  - name: app
-    cidr: 10.0.0.0/24
-    base: 10.0.0
-    tailscale: yes
-  - name: iot
-    cidr: 192.168.32.0/24
-    base: 192.168.32
-    tailscale: yes
+# networks:
+#   - name: lan
+#     cidr: 192.168.2.0/24
+#     base: 192.168.2
+#     interface: ens18
+#     tailscale: yes # whether the subnet should be exposed to other Tailscale nodes
+#   - name: app
+#     cidr: 10.0.0.0/24
+#     base: 10.0.0
+#     tailscale: yes
+#   - name: iot
+#     cidr: 192.168.32.0/24
+#     base: 192.168.32
+#     tailscale: yes
 
 # Docker apps
 docker_dir: /opt/docker/data
@@ -70,6 +68,6 @@ extra_packages:
 security_ssh_port: 69
 security_sudoers_passwordless: ['{{ username }}']
 security_autoupdate_reboot: true
-security_autoupdate_mail_to: '{{ email }}'
 security_autoupdate_reboot_time: '03:00'
-security_autoupdate_mail_on_error: false
+
+ssh_public_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
