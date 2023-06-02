@@ -65,9 +65,6 @@ extra_packages:
 # msmtp_alias_default: '{{ email }}'
 
 # SSH (geerlingguy.security)
-security_ssh_port: 69
 security_sudoers_passwordless: ['{{ username }}']
-security_autoupdate_reboot: true
+security_autoupdate_reboot: false
 security_autoupdate_reboot_time: '03:00'
-
-ssh_public_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
