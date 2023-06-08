@@ -23,8 +23,8 @@
 
 - name: Copy the compose file
   template: 
-    src: templates/compose.yaml
-    dest: "{{ docker_compose_dir }}/compose.yaml"
+    src: templates/compose.yml
+    dest: "{{ docker_compose_dir }}/compose.yml"
   vars:
     app_cidr: "{{ (networks | selectattr('name', '==', 'app') | map(attribute='cidr') | first) | default('') }}"
     app_base: "{{ (networks | selectattr('name', '==', 'app') | map(attribute='base') | first) | default('') }}"
@@ -32,4 +32,6 @@
 - name: Docker-compose up
   community.docker.docker_compose:
     project_src: "{{ docker_compose_dir }}"
+    remove_orphans: "{{ services_remove_orphans }}"
+
 

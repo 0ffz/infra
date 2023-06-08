@@ -13,9 +13,8 @@
 - name: Create a login user
   user:
     name: "{{ username }}"
-    password: "{{ password | password_hash('sha512') }}"
-    groups: 
-      - "{{ sudo_group }}"
+    groups:
+#      - "{{ sudo_group }}"
       - docker
       - users
     state: present

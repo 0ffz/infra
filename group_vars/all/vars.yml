@@ -33,7 +33,10 @@ guid: 1000
 docker_dir: /opt/docker/data
 docker_compose_dir: /opt/docker/compose
 services:
-  - minecraft-create-astral
+#  - minecraft-create-astral
+  - minecraft-valhelsia-5
+  - cloudflare-ddns
+services_remove_orphans: true
 
 # Packages
 extra_packages:
@@ -41,7 +44,6 @@ extra_packages:
   - htop
   - stow
   - git
-  - micro
   - rsync
   - ncdu
 
@@ -66,5 +68,6 @@ extra_packages:
 
 # SSH (geerlingguy.security)
 security_sudoers_passwordless: ['{{ username }}']
+security_autoupdate_enabled: false
 security_autoupdate_reboot: false
 security_autoupdate_reboot_time: '03:00'
