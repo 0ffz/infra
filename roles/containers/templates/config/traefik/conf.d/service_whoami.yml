@@ -1,0 +1,23 @@
+http:
+  services:
+    whoami:
+      loadBalancer:
+        servers:
+          - url: "http://whoami:80"
+
+  routers:
+    whoami-dynamic:
+      rule: Host(`whoamid.{{domain_services}}`)
+      entryPoints:
+        - "websecure"
+      middlewares:
+        - sablier-long-session@file
+      service: "whoami"
+
+    whoami-blocking:
+      rule: Host(`whoamib.{{domain_services}}`)
+      entryPoints:
+        - "websecure"
+      middlewares:
+        - sablier-blocking@file
+      service: "whoami"

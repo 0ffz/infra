@@ -5,93 +5,102 @@ services:
     restart: always
     environment:
       API_KEY: "{{ cloudflare_api_key }}"
-      ZONE: "offz.me"
+      ZONE: "{{ cloudflare_zone }}"
       SUBDOMAIN: "maple"
       PROXIED: "false"
 
   traefik:
-    container_name: traefik
     image: "traefik:latest"
+    container_name: traefik
+    restart: always
     networks:
       - traefik
     environment:
       CLOUDFLARE_EMAIL: "{{ cloudflare_email }}"
       CLOUDFLARE_DNS_API_TOKEN: "{{ cloudflare_api_key }}"
-    command:
-      # Tell Traefik to discover containers using the Docker API
-      - --providers.docker=true
-      # Enable the Trafik dashboard
-#      - --api.dashboard=true
-      # Set up LetsEncrypt
-      - --certificatesresolvers.letsencrypt.acme.dnschallenge=true
-      - --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare
-      - --certificatesresolvers.letsencrypt.acme.email={{ cloudflare_email }}
-      - --certificatesresolvers.letsencrypt.acme.storage=/acme_data/acme.json
-      # Set up an insecure listener that redirects all traffic to TLS
-      - --entrypoints.web.address=:80
-      - --entrypoints.web.http.redirections.entrypoint.to=websecure
-      - --entrypoints.web.http.redirections.entrypoint.scheme=https
-      - --entrypoints.websecure.address=:443
-      # Set up the TLS configuration for our websecure listener
-      - --entrypoints.websecure.http.tls=true
-      - --entrypoints.websecure.http.tls.certResolver=letsencrypt
-      - --entrypoints.websecure.http.tls.domains[0].main=home.offz.me
-      - --entrypoints.websecure.http.tls.domains[0].sans=*.home.offz.me
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "acme_data:/acme_data/"
-    labels:
-      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
-      - "traefik.http.routers.http-catchall.entrypoints=web"
-      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-#      - "traefik.http.routers.traefik-secure"
+      - "{{ docker_compose_dir }}/config/traefik/traefik.yml:/traefik.yml"
+      - "{{ docker_compose_dir }}/config/traefik/conf.d:/conf.d"
 
   agent:
+    image: portainer/agent
     networks:
       - traefik
-    image: portainer/agent
+    restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/lib/docker/volumes:/var/lib/docker/volumes
 
   portainer:
     image: portainer/portainer-ce
+    restart: always
     networks:
       - traefik
     command: -H tcp://agent:9001 --tlsskipverify
-    # ports:
-    #   - "9000:9000"
-    #   - "9443:9443"
-    labels:
-      # Frontend
-      - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`portainer.home.offz.me`)"
-      - "traefik.http.routers.frontend.entrypoints=websecure"
-      - "traefik.http.services.frontend.loadbalancer.server.port=9000"
-      - "traefik.http.routers.frontend.service=frontend"
-      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
-#
-#      # Edge
-#      - "traefik.http.routers.edge.rule=Host(`edge.localhost`)"
-#      - "traefik.http.routers.edge.entrypoints=websecure"
-#      - "traefik.http.services.edge.loadbalancer.server.port=8000"
-#      - "traefik.http.routers.edge.service=edge"
-#      - "traefik.http.routers.edge.tls.certresolver=letsencrypt"
     volumes:
       - portainer_data:/data
-  # whoami:
-  #     # A container that exposes an API to show its IP address
-  #     image: traefik/whoami
-  #     labels:
-  #       - "traefik.http.routers.whoami.rule=Host(`whoami.docker.localhost`)"
 
+  sablier:
+    image: acouvreur/sablier:1.4.0
+    networks:
+      - traefik
+    command:
+      - start
+      - --provider.name=docker
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+
+#
+#  oauth2proxy:
+#    image: quay.io/oauth2-proxy/oauth2-proxy:latest
+#    networks:
+#      - traefik
+#    environment:
+#      OAUTH2_PROXY_HTTP_ADDRESS: '0.0.0.0:4180'
+#      OAUTH2_PROXY_COOKIE_SECRET: 'janjVhDce7l1thZoSHGPBiR2sKHVBlQ0aUDei15uDIA='
+#      OAUTH2_PROXY_COOKIE_DOMAINS: '.home.offz.me' # Required so cookie can be read on all subdomains.
+#      OAUTH2_PROXY_WHITELIST_DOMAINS: '.home.offz.me' # Required to allow redirection back to original requested target.
+#      # Configure to use GitHub
+#      OAUTH2_PROXY_PROVIDER: 'github'
+#      OAUTH2_PROXY_CLIENT_ID: '7e8e877686b94f27cd66'
+#      OAUTH2_PROXY_CLIENT_SECRET: '1d46e9fd65106627cdbf2d4b7873a6cda9228eea'
+#      OAUTH2_PROXY_EMAIL_DOMAINS: '*'
+#      OAUTH2_PROXY_GITHUB_ORG: 'MineInAbyss'
+#      OAUTH2_PROXY_GITHUB_TEAM: 'staff'
+#      OAUTH2_PROXY_REDIRECT_URL: 'https://auth.home.offz.me/oauth2/callback'
+#      OAUTH2_PROXY_SCOPE: "user:email"
+#      #
+##      OAUTH2_PROXY_COOKIE_CSRF_PER_REQUEST: "true"
+##      OAUTH2_PROXY_COOKIE_CSRF_EXPIRE: '5m'
+#      OAUTH2_PROXY_CUSTOM_TEMPLATES_DIR: "/templates"
+#      OAUTH2_PROXY_REVERSE_PROXY: "true"
+#      OAUTH2_PROXY_SET_XAUTHREQUEST: "true"
+#    volumes:
+#      - "{{ docker_compose_dir }}/config/oauth2-proxy/templates:/templates:ro"
+#    labels:
+#      - "traefik.enable=true"
+#      - "traefik.http.routers.route-authproxy.rule=(Host(`auth.home.offz.me`) && PathPrefix(`/oauth2/`)) || (PathPrefix(`/oauth2/`))"
+#      - "traefik.http.services.route-authproxy.loadbalancer.server.port=4180"
+##      - "traefik.http.routers.route-authproxy.tls.certresolver=letsencrypt"
+##      - "traefik.http.routers.route-authproxy.middlewares=auth-headers"
+#      # auth-headers middleware
+##      - "traefik.http.middlewares.auth-headers.headers.sslRedirect=true"
+##      - "traefik.http.middlewares.auth-headers.headers.STSSeconds=315360000"
+##      - "traefik.http.middlewares.auth-headers.headers.browserXSSFilter=true"
+##      - "traefik.http.middlewares.auth-headers.headers.contentTypeNosniff=true"
+##      - "traefik.http.middlewares.auth-headers.headers.forceSTSHeader=true"
+##      - "traefik.http.middlewares.auth-headers.headers.sslHost=home.offz.me"
+##      - "traefik.http.middlewares.auth-headers.headers.stsIncludeSubdomains=true"
+##      - "traefik.http.middlewares.auth-headers.headers.stsPreload=true"
+##      - "traefik.http.middlewares.auth-headers.headers.frameDeny=true"
+#    restart: unless-stopped
 volumes:
   portainer_data:
   acme_data:
-
 networks:
   traefik:

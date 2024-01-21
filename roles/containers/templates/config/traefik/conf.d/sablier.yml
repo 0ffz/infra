@@ -1,0 +1,23 @@
+http:
+  middlewares:
+    sablier-long-session:
+      plugin:
+        sablier:
+          dynamic:
+            displayName: My Title
+            refreshFrequency: 5s
+            showDetails: "true"
+            theme: hacker-terminal
+          group: default
+#          names: whoami,nginx
+          sablierUrl: http://sablier:10000
+          sessionDuration: 1m
+    sablier-blocking:
+      plugin:
+        sablier:
+          blocking:
+            timeout: 30s
+          group: default
+          sablierUrl: http://sablier:10000
+          sessionDuration: 1m
+
