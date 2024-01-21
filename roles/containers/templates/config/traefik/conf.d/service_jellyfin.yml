@@ -1,0 +1,15 @@
+http:
+  services:
+    jellyfin:
+      loadBalancer:
+        servers:
+          - url: "http://jellyfin:8096"
+
+  routers:
+    jellyfin:
+      rule: Host(`jellyfin.{{domain_services}}`)
+      entryPoints:
+        - "websecure"
+      middlewares:
+        - sablier-jellyfin@file
+      service: "jellyfin"

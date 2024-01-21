@@ -8,6 +8,8 @@ http:
   routers:
     filebrowser:
       rule: Host(`files.{{domain_services}}`)
-      service: "filebrowser"
+      entryPoints:
+        - "websecure"
       middlewares:
-        - sablier-long-session@file
+        - sablier-filebrowser@file
+      service: "filebrowser"

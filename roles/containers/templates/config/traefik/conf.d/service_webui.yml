@@ -1,0 +1,15 @@
+http:
+  services:
+    organizr:
+      loadBalancer:
+        servers:
+          - url: "http://organizr:80"
+
+  routers:
+    organizr:
+      rule: Host(`{{domain_services}}`)
+      entryPoints:
+        - "websecure"
+      middlewares:
+        - sablier-webui@file
+      service: "organizr"

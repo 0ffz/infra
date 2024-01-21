@@ -1,0 +1,15 @@
+http:
+  services:
+    deemix:
+      loadBalancer:
+        servers:
+          - url: "http://deemix:6595"
+
+  routers:
+    deemix:
+      rule: Host(`deemix.{{domain_services}}`)
+      entryPoints:
+        - "websecure"
+      middlewares:
+        - sablier-deemix@file
+      service: "deemix"

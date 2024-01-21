@@ -1,23 +1,49 @@
 http:
   middlewares:
-    sablier-long-session:
+    sablier-filebrowser:
       plugin:
         sablier:
           dynamic:
-            displayName: My Title
+            displayName: Filebrowser
             refreshFrequency: 5s
             showDetails: "true"
-            theme: hacker-terminal
-          group: default
-#          names: whoami,nginx
+            theme: ghost
+          group: filebrowser
           sablierUrl: http://sablier:10000
-          sessionDuration: 1m
-    sablier-blocking:
+          sessionDuration: 30m
+
+    sablier-deemix:
       plugin:
         sablier:
-          blocking:
-            timeout: 30s
-          group: default
+          dynamic:
+            displayName: Deemix
+            refreshFrequency: 5s
+            showDetails: "true"
+            theme: ghost
+          group: deemix
           sablierUrl: http://sablier:10000
           sessionDuration: 1m
 
+    sablier-jellyfin:
+      plugin:
+        sablier:
+          dynamic:
+            displayName: Jellyfin
+            refreshFrequency: 5s
+            showDetails: "true"
+            theme: ghost
+          group: jellyfin
+          sablierUrl: http://sablier:10000
+          sessionDuration: 30m
+
+    sablier-webui:
+      plugin:
+        sablier:
+          dynamic:
+            displayName: Web UI
+            refreshFrequency: 5s
+            showDetails: "true"
+            theme: ghost
+          group: webui
+          sablierUrl: http://sablier:10000
+          sessionDuration: 30m
